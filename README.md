@@ -32,7 +32,7 @@ Then press `prefix + I` to install.
 | `prefix + W` | Open the workspace tree. Type to filter by window or repo name, `enter` to jump. |
 | `prefix + F` | Toggle the status bar filter (show all windows / only the current workspace). |
 
-A short toast (`▸ homelab ⎇ main (3 windows)`) appears when you move into another workspace from the tree or by stepping, and when you toggle the filter.
+A short toast (`▸ homelab ⎇ main (3 windows)`) pops up in the top-right corner when you step into another workspace, and when you toggle the filter. It's a small popup, so any key dismisses it early (the key is swallowed).
 
 Selecting a repo header jumps to that repo's first window. Switching windows any other way also switches the status bar to the workspace you land in.
 
@@ -51,6 +51,7 @@ set -g @workspaces-prev-key 'S-Left'
 set -g @workspaces-key 'W'          # key for the workspace tree
 set -g @workspaces-toggle-key 'F'   # key to toggle the status bar filter
 set -g @workspaces-filter 'off'     # start with the filter disabled
+set -g @workspaces-toast 'popup'    # popup (default) | message (status line) | off
 ```
 
 ## How it works

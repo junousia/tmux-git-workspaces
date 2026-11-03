@@ -25,5 +25,5 @@ if [[ $dir == prev ]]; then t=$(( (cur - 1 + n) % n )); else t=$(( (cur + 1) % n
 
 tmux select-window -t "${ids[$t]}"
 
-[[ ${of[$t]} != "$current_root" ]] && "$(dirname "${BASH_SOURCE[0]}")/toast.sh" "${of[$t]}"
+[[ ${of[$t]} != "$current_root" ]] && "$(dirname "${BASH_SOURCE[0]}")/toast.sh" ws "${of[$t]}"
 exit 0
