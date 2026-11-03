@@ -53,7 +53,7 @@ set -g @workspaces-toggle-key 'F'   # key to toggle the status bar filter
 set -g @workspaces-filter 'off'     # start with the filter disabled
 set -g @workspaces-toast 'popup'    # popup (default) | message (status line) | off
 set -g @workspaces-toast-duration '2.5'    # seconds the toast stays
-set -g @workspaces-toast-border '#665c54' # toast border colour (default: the palette's muted colour)
+# set -g @workspaces-toast-border '#665c54'  # override the toast border (default: the palette's muted colour)
 ```
 
 ## Colours
