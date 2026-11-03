@@ -53,8 +53,12 @@ set -g @workspaces-toggle-key 'F'   # key to toggle the status bar filter
 set -g @workspaces-filter 'off'     # start with the filter disabled
 set -g @workspaces-toast 'popup'    # popup (default) | message (status line) | off
 set -g @workspaces-toast-duration '2.5'    # seconds the toast stays
-set -g @workspaces-toast-border '#665c54' # toast border colour
+set -g @workspaces-toast-border '#665c54' # toast border colour (default: the palette's muted colour)
 ```
+
+## Colours
+
+The picker and toasts use the terminal's own ANSI colours, so they follow your terminal theme. If [tmux-axolotl](https://github.com/junousia/tmux-axolotl) is installed, they inherit its colour scheme instead (`@axolotl-scheme`), matching the status bar. Truecolor, 256-colour and basic terminals each get the best colours they support.
 
 ## How it works
 

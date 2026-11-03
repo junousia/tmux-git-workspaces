@@ -5,7 +5,8 @@
 # Any key dismisses it early; S-Left/S-Right also keep stepping (see toast-body.sh).
 # Options: @workspaces-toast popup (default) | message (status line) | off
 #          @workspaces-toast-duration seconds (default 2.5)
-#          @workspaces-toast-border border colour (default #665c54)
+#          @workspaces-toast-border border colour (default: the palette's muted colour)
+# Colours follow tmux-axolotl's palette when present, else the terminal's ANSI colours.
 
 mode=$1; shift
 style=$(tmux show-option -gqv @workspaces-toast); style=${style:-popup}
@@ -13,12 +14,13 @@ style=$(tmux show-option -gqv @workspaces-toast); style=${style:-popup}
 
 opt() { local v; v=$(tmux show-option -gqv "$1"); echo "${v:-$2}"; }
 duration=$(opt @workspaces-toast-duration 2.5)
-border=$(opt @workspaces-toast-border '#665c54')
+# shellcheck source=palette.sh
+source "$(dirname "${BASH_SOURCE[0]}")/palette.sh"
+border=$(opt @workspaces-toast-border "$P_MUTED")
 
-# muted gruvbox: cream name, grey branch/count, one orange accent
-reset='\033[0m'; bold='\033[1m'
-accent='\033[38;2;214;93;14m'; cream='\033[38;2;235;219;178m'
-grey='\033[38;2;168;153;132m'; dark='\033[38;2;146;131;116m'
+reset='\033[0m'; bold='\033[1m'; dimmed='\033[2m'
+accent="\033[$(sgr_fg "$P_ACCENT")m"; cream="\033[$(sgr_fg "$P_TEXT")m"
+grey="\033[$(sgr_fg "$P_MUTED")m"; dark="${dimmed}\033[$(sgr_fg "$P_MUTED")m"
 
 if [[ $mode == ws ]]; then
   root=$1; name=${root##*/}; branch=
