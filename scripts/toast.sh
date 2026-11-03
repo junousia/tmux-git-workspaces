@@ -2,14 +2,23 @@
 # Show a short toast, as a small popup in the top-right corner.
 #   toast.sh ws <workspace root>   e.g. "▸ homelab  ⎇ main  (3 windows)"
 #   toast.sh msg <text>
-# Any key dismisses it early (and is swallowed: popups are modal).
-# @workspaces-toast: popup (default) | message (status line) | off
+# Any key dismisses it early; S-Left/S-Right also keep stepping (see toast-body.sh).
+# Options: @workspaces-toast popup (default) | message (status line) | off
+#          @workspaces-toast-duration seconds (default 2.5)
+#          @workspaces-toast-border border colour (default #665c54)
 
 mode=$1; shift
 style=$(tmux show-option -gqv @workspaces-toast); style=${style:-popup}
 [[ $style == off ]] && exit 0
 
-dim='\033[2m'; bold='\033[1m'; yellow='\033[33m'; magenta='\033[35m'; reset='\033[0m'
+opt() { local v; v=$(tmux show-option -gqv "$1"); echo "${v:-$2}"; }
+duration=$(opt @workspaces-toast-duration 2.5)
+border=$(opt @workspaces-toast-border '#665c54')
+
+# muted gruvbox: cream name, grey branch/count, one orange accent
+reset='\033[0m'; bold='\033[1m'
+accent='\033[38;2;214;93;14m'; cream='\033[38;2;235;219;178m'
+grey='\033[38;2;168;153;132m'; dark='\033[38;2;146;131;116m'
 
 if [[ $mode == ws ]]; then
   root=$1; name=${root##*/}; branch=
@@ -17,7 +26,7 @@ if [[ $mode == ws ]]; then
   count=$(tmux list-windows -F '#{@workspace}' | grep -cxF -- "$root")
   noun=windows; (( count == 1 )) && noun=window
   plain="▸ ${name}${branch:+  ⎇ $branch}  ($count $noun)"
-  colored="${bold}${yellow}▸ ${name}${reset}${branch:+  ${magenta}⎇ ${branch}${reset}}  ${dim}(${count} ${noun})${reset}"
+  colored="${accent}▸${reset} ${bold}${cream}${name}${reset}${branch:+  ${grey}⎇ ${branch}${reset}}  ${dark}(${count} ${noun})${reset}"
 else
   plain=$1; colored=$1
 fi
@@ -27,6 +36,6 @@ if [[ $style == message ]]; then
   exit 0
 fi
 
-tmux display-popup -E -x R -y 0 -w $(( ${#plain} + 4 )) -h 3 -b rounded -S 'fg=#fabd2f' \
-  -e "TOAST=$colored" \
-  "bash -c 'printf \" %b\\n\" \"\$TOAST\"; read -rsn1 -t 1.2'"
+tmux display-popup -E -x R -y 0 -w $(( ${#plain} + 4 )) -h 3 -b rounded -S "fg=$border" \
+  -e "TOAST=$colored" -e "TOAST_DURATION=$duration" -e "TOAST_DIR=$(dirname "${BASH_SOURCE[0]}")" \
+  "bash '$(dirname "${BASH_SOURCE[0]}")/toast-body.sh'"
