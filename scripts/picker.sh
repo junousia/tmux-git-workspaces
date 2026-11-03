@@ -2,7 +2,8 @@
 # Show the workspace tree in fzf and jump to the chosen window.
 dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
-choice=$("$dir/list.sh" | fzf --ansi --no-sort --layout=reverse --no-border --info=inline-right \
+# Ignore the user's global fzf options (height, margin, border...): they break the popup layout.
+choice=$("$dir/list.sh" | FZF_DEFAULT_OPTS= fzf --ansi --no-sort --layout=reverse --no-border --info=inline-right \
   --delimiter=$'\t' --with-nth=2,4 \
   --prompt='  ' --pointer='▌' --marker='▌' \
   --header=$'enter jump · esc cancel · type to filter windows or repos\n' \

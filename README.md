@@ -15,13 +15,15 @@ Windows outside any git repo are grouped together under a single `(no repo)` wor
 
 ## Install
 
-With [TPM](https://github.com/tmux-plugins/tpm), add this **after** your theme plugin (the plugin wraps the theme's window formats, so the theme must load first):
+With [TPM](https://github.com/tmux-plugins/tpm), add this to your `~/.tmux.conf`:
 
 ```tmux
 set -g @plugin 'junousia/tmux-git-workspaces'
 ```
 
 Then press `prefix + I` to install.
+
+**Plugin order matters.** The plugin wraps your theme's `window-status-format`, and how the theme sets it decides which order works. If the status bar isn't filtered, move the `@plugin` line to the other side of your theme plugin (with tmux2k, placing it *before* the theme worked).
 
 ## Usage
 
