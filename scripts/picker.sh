@@ -10,4 +10,9 @@ choice=$("$dir/list.sh" | FZF_DEFAULT_OPTS= fzf --ansi --no-sort --layout=revers
   --preview="'$dir/preview.sh' {1} {3}" --preview-window='right,45%,border-left,wrap' \
   --color='bg+:#3c3836,fg+:#ebdbb2,hl:#fabd2f,hl+:#fabd2f,pointer:#fe8019,prompt:#fe8019,header:#928374,info:#928374,border:#504945,gutter:-1') || exit 0
 
-tmux select-window -t "${choice%%$'\t'*}"
+id=${choice%%$'\t'*}
+root=$(cut -f3 <<< "$choice")
+before=$(tmux show-option -gqv @workspace-active)
+
+tmux select-window -t "$id"
+[[ $root != "$before" ]] && tmux run-shell -b "'$dir/toast.sh' '$root'"

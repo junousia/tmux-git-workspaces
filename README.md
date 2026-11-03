@@ -32,7 +32,18 @@ Then press `prefix + I` to install.
 | `prefix + W` | Open the workspace tree. Type to filter by window or repo name, `enter` to jump. |
 | `prefix + F` | Toggle the status bar filter (show all windows / only the current workspace). |
 
+A short toast (`▸ homelab ⎇ main (3 windows)`) appears when you move into another workspace from the tree or by stepping, and when you toggle the filter.
+
 Selecting a repo header jumps to that repo's first window. Switching windows any other way also switches the status bar to the workspace you land in.
+
+## Stepping through windows
+
+`next-window` / `previous-window` walk the windows by index, which also visits windows hidden by the filter and jumps between repos in an arbitrary order. The plugin can bind keys that step in **tree order** instead (each repo's windows together, repos in the order the tree shows them), wrapping around and crossing into the next workspace naturally. Crossing into another workspace shows a short toast with its name and branch.
+
+```tmux
+set -g @workspaces-next-key 'S-Right'   # bound without prefix
+set -g @workspaces-prev-key 'S-Left'
+```
 
 ## Options
 
@@ -60,7 +71,7 @@ bind % split-window -h -c "#{pane_current_path}"
 ## Limitations
 
 - Built for a single tmux session; the active workspace is stored globally.
-- `next-window` / `previous-window` still cycle through hidden windows too.
+- The built-in `next-window` / `previous-window` still cycle through hidden windows; use the stepping keys above for tree order.
 
 ## License
 

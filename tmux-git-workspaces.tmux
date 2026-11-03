@@ -5,8 +5,15 @@ dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 opt() { local v; v=$(tmux show-option -gqv "$1"); echo "${v:-$2}"; }
 
 tmux bind-key "$(opt @workspaces-key W)" display-popup -E -w 85% -h 70% -b rounded -T ' workspaces ' "$dir/scripts/picker.sh"
-tmux bind-key "$(opt @workspaces-toggle-key F)" if-shell -F '#{==:#{@workspaces-filter},off}' \
-  'set -g @workspaces-filter on' 'set -g @workspaces-filter off'
+# Optional: step through windows in workspace-tree order (no prefix), e.g.
+#   set -g @workspaces-next-key S-Right
+#   set -g @workspaces-prev-key S-Left
+next_key=$(opt @workspaces-next-key '')
+prev_key=$(opt @workspaces-prev-key '')
+[[ -n $next_key ]] && tmux bind-key -n "$next_key" run-shell "$dir/scripts/step.sh next"
+[[ -n $prev_key ]] && tmux bind-key -n "$prev_key" run-shell "$dir/scripts/step.sh prev"
+
+tmux bind-key "$(opt @workspaces-toggle-key F)" run-shell "$dir/scripts/toggle.sh"
 
 # Wrap the theme's window formats once: other workspaces' windows render empty.
 # (The original format is kept in an option and expanded with #{E:...}, which
