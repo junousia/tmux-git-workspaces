@@ -43,4 +43,12 @@ for h in after-new-window after-split-window window-linked pane-focus-in session
   tmux set-hook -g "$h[4$i]" "$sync"
   i=$((i + 1))
 done
+# Layout (current workspace, tab positions) runs synchronously on window changes
+# so the status bar updates in the same frame; it needs no git.
+layout="run-shell '$dir/scripts/layout.sh'"
+i=0
+for h in session-window-changed client-session-changed window-linked window-unlinked; do
+  tmux set-hook -g "$h[5$i]" "$layout"
+  i=$((i + 1))
+done
 tmux run-shell -b "$dir/scripts/sync.sh"

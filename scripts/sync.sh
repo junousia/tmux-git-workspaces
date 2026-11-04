@@ -16,5 +16,6 @@ while IFS=$'\t' read -r id active path ws; do
   [[ $active == 1 ]] && current=$root
 done < <(tmux list-windows "${sess[@]}" -F "$fmt")
 
-[[ -n $current ]] && tmux set-option -gq @workspace-active "$current"
-exit 0
+[[ -n $current && $(tmux show-option -gqv @workspace-active) != "$current" ]] && tmux set-option -gq @workspace-active "$current"
+
+exec "$(dirname "${BASH_SOURCE[0]}")/layout.sh" "$@"
