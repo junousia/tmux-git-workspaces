@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # Select the next/previous window in workspace-tree order (workspaces by their
-# first window, windows by index), wrapping around. Crossing into another
-# workspace shows a toast. $1: next|prev, or next-ws|prev-ws to jump to the
+# first window, windows by index), wrapping around. $1: next|prev, or next-ws|prev-ws to jump to the
 # next/previous workspace (landing on the window you last used there).
 dir=${1:-next}
 
@@ -29,7 +28,6 @@ if [[ $dir == *-ws ]]; then
   want=$(tmux show-option -gqv "$key")
   target=; for id in ${members[$root]}; do [[ -z $target ]] && target=$id; [[ $id == "$want" ]] && { target=$id; break; }; done
   tmux select-window -t "$target"
-  "$(dirname "${BASH_SOURCE[0]}")/toast.sh" ws "$root"
   exit 0
 fi
 
@@ -39,5 +37,4 @@ if [[ $dir == prev ]]; then t=$(( (cur - 1 + n) % n )); else t=$(( (cur + 1) % n
 
 tmux select-window -t "${ids[$t]}"
 
-[[ ${of[$t]} != "$current_root" ]] && "$(dirname "${BASH_SOURCE[0]}")/toast.sh" ws "${of[$t]}"
 exit 0
