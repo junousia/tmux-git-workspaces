@@ -1,15 +1,21 @@
 #!/usr/bin/env bash
-# Show a short toast, as a small popup in the top-right corner.
+# Show a short toast: in tmux-axolotl's status bar (default when it is present; it
+# is not modal, so your keys keep going to the pane and it clears itself), or as a
+# small popup in the top-right corner (tmux popups are modal).
 #   toast.sh ws <workspace root>   e.g. "▸ homelab  ⎇ main  (3 windows)"
 #   toast.sh msg <text>
 # Any key dismisses it early; S-Left/S-Right also keep stepping (see toast-body.sh).
-# Options: @workspaces-toast popup (default) | message (status line) | off
+# Options: @workspaces-toast bar | popup | message (status line) | off
+#            (default: bar with tmux-axolotl, else popup)
 #          @workspaces-toast-duration seconds (default 2.5)
 #          @workspaces-toast-border border colour (default: the palette's muted colour)
 # Colours follow tmux-axolotl's palette when present, else the terminal's ANSI colours.
 
 mode=$1; shift
-style=$(tmux show-option -gqv @workspaces-toast); style=${style:-popup}
+style=$(tmux show-option -gqv @workspaces-toast)
+if [[ -z $style ]]; then
+  [[ -n $(tmux show-option -gqv @axolotl-pal-rgb-accent) ]] && style=bar || style=popup
+fi
 [[ $style == off ]] && exit 0
 
 opt() { local v; v=$(tmux show-option -gqv "$1"); echo "${v:-$2}"; }
@@ -31,6 +37,20 @@ if [[ $mode == ws ]]; then
   colored="${accent}▸${reset} ${bold}${cream}${name}${reset}${branch:+  ${grey}⎇ ${branch}${reset}}  ${dark}(${count} ${noun})${reset}"
 else
   plain=$1; colored=$1
+fi
+
+if [[ $style == bar ]]; then
+  # shown by tmux-axolotl's 'toast' segment; a newer toast supersedes an older timer
+  id=$RANDOM$RANDOM
+  tmux set-option -g @workspaces-toast-text "$plain" ';' set-option -g @workspaces-toast-id "$id" ';' refresh-client -S 2>/dev/null
+  (
+    sleep "$duration"
+    if [[ $(tmux show-option -gqv @workspaces-toast-id) == "$id" ]]; then
+      tmux set-option -g @workspaces-toast-text "" ';' refresh-client -S 2>/dev/null
+    fi
+  ) >/dev/null 2>&1 &
+  disown
+  exit 0
 fi
 
 if [[ $style == message ]]; then

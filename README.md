@@ -32,7 +32,7 @@ Then press `prefix + I` to install.
 | `prefix + W` | Open the workspace tree. Type to filter by window or repo name, `enter` to jump. |
 | `prefix + F` | Toggle the status bar filter (show all windows / only the current workspace). |
 
-A short toast (`▸ homelab ⎇ main (3 windows)`) pops up in the top-right corner when you step into another workspace, and when you toggle the filter. It's a small popup, so any key dismisses it early. `S-Left` / `S-Right` pressed during a toast are handed off, so rapid stepping keeps stepping; any other key is swallowed.
+A short toast (`▸ homelab ⎇ main (3 windows)`) appears when you step into another workspace, and when you toggle the filter. With [tmux-axolotl](https://github.com/junousia/tmux-axolotl) (0.5.0+) it is a pill in the status bar's right panel that clears itself: it's not modal, so your keys keep going to the pane and there is nothing to dismiss. Without it, or with `@workspaces-toast 'popup'`, it is a small popup in the top-right corner. tmux popups are modal, so any key dismisses that one early; `S-Left` / `S-Right` pressed during it are handed off, so rapid stepping keeps stepping, and any other key is swallowed.
 
 Selecting a repo header jumps to that repo's first window. Switching windows any other way also switches the status bar to the workspace you land in.
 
@@ -53,7 +53,7 @@ set -g @workspaces-prev-ws-key 'S-Up'     # ... and the previous one
 set -g @workspaces-key 'W'          # key for the workspace tree
 set -g @workspaces-toggle-key 'F'   # key to toggle the status bar filter
 set -g @workspaces-filter 'off'     # start with the filter disabled
-set -g @workspaces-toast 'popup'    # popup (default) | message (status line) | off
+set -g @workspaces-toast 'bar'      # bar (default with tmux-axolotl) | popup (default otherwise) | message (status line) | off
 set -g @workspaces-toast-duration '2.5'    # seconds the toast stays
 # set -g @workspaces-toast-border '#665c54'  # override the toast border (default: the palette's muted colour)
 ```
