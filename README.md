@@ -43,6 +43,8 @@ Selecting a repo header jumps to that repo's first window. Switching windows any
 ```tmux
 set -g @workspaces-next-key 'S-Right'   # bound without prefix
 set -g @workspaces-prev-key 'S-Left'
+set -g @workspaces-next-ws-key 'S-Down'   # jump to the next workspace (repo)
+set -g @workspaces-prev-ws-key 'S-Up'     # ... and the previous one
 ```
 
 ## Options

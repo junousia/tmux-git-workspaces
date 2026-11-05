@@ -30,6 +30,12 @@ for i in "${!ids[@]}"; do
 done
 n=${#vis[@]}
 cmd=(); changed=0
+# remember the last window used in each workspace (for workspace jumps)
+for i in "${!ids[@]}"; do
+  [[ ${act[$i]} == 1 ]] || continue
+  lk=@wslast-$(cksum <<<"$current" | cut -d' ' -f1)
+  [[ $(tmux show-option -gqv "$lk") == "${ids[$i]}" ]] || tmux set-option -gq "$lk" "${ids[$i]}"
+done
 [[ $(tmux show-option -gqv @workspace-active) == "$current" ]] || { cmd+=(set-option -gq @workspace-active "$current" \;); changed=1; }
 declare -A want
 for i in "${!vis[@]}"; do

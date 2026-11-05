@@ -8,10 +8,16 @@ tmux bind-key "$(opt @workspaces-key W)" display-popup -E -w 85% -h 70% -b round
 # Optional: step through windows in workspace-tree order (no prefix), e.g.
 #   set -g @workspaces-next-key S-Right
 #   set -g @workspaces-prev-key S-Left
+# and to jump between workspaces: @workspaces-next-ws-key / @workspaces-prev-ws-key
 next_key=$(opt @workspaces-next-key '')
 prev_key=$(opt @workspaces-prev-key '')
 [[ -n $next_key ]] && tmux bind-key -n "$next_key" run-shell "$dir/scripts/step.sh next"
 [[ -n $prev_key ]] && tmux bind-key -n "$prev_key" run-shell "$dir/scripts/step.sh prev"
+# Optional: jump to the next/previous workspace (repo), e.g. S-Down / S-Up
+next_ws_key=$(opt @workspaces-next-ws-key '')
+prev_ws_key=$(opt @workspaces-prev-ws-key '')
+[[ -n $next_ws_key ]] && tmux bind-key -n "$next_ws_key" run-shell "$dir/scripts/step.sh next-ws"
+[[ -n $prev_ws_key ]] && tmux bind-key -n "$prev_ws_key" run-shell "$dir/scripts/step.sh prev-ws"
 
 tmux bind-key "$(opt @workspaces-toggle-key F)" run-shell "$dir/scripts/toggle.sh"
 
