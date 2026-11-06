@@ -5,14 +5,26 @@
 # The filter is global, which assumes a single session.
 
 sess=(); [[ -n $1 ]] && sess=(-t "$1")
+# The status job can run on every redraw, including each tab switch. Recheck
+# unchanged directories only occasionally; normal path changes are immediate.
+last_refresh=$(tmux show-option -gqv @workspace-last-refresh)
+if [[ $2 == --refresh || -z $last_refresh || $(( EPOCHSECONDS - last_refresh )) -ge 30 ]]; then
+  refresh=1
+  tmux set-option -gq @workspace-last-refresh "$EPOCHSECONDS"
+fi
 # @workspace goes last: read collapses empty tab-separated fields.
-fmt=$'#{window_id}\t#{window_active}\t#{pane_current_path}\t#{@workspace}'
+fmt=$'#{window_id}\t#{window_active}\t#{pane_current_path}\t#{@workspace}\t#{@workspace-path}'
 current=
 
-while IFS=$'\t' read -r id active path ws; do
+while IFS=$'\t' read -r id active path ws cached_path; do
   [[ -d $path ]] || path=$HOME
-  root=$(git -C "$path" rev-parse --show-toplevel 2>/dev/null) || root="(no repo)"
-  [[ $root == "$ws" ]] || tmux set-option -wq -t "$id" @workspace "$root"
+  if [[ -z $refresh && $path == "$cached_path" && -n $ws ]]; then
+    root=$ws
+  else
+    root=$(git -C "$path" rev-parse --show-toplevel 2>/dev/null) || root="(no repo)"
+    tmux set-option -wq -t "$id" @workspace "$root" ';' \
+      set-option -wq -t "$id" @workspace-path "$path"
+  fi
   [[ $active == 1 ]] && current=$root
 done < <(tmux list-windows "${sess[@]}" -F "$fmt")
 

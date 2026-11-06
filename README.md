@@ -60,8 +60,8 @@ The picker uses the terminal's own ANSI colours, so they follow your terminal th
 
 ## How it works
 
-- Each window is tagged (`@workspace`) with the git root of its active pane. Tags refresh on window and focus hooks and every `status-interval`, so a window moves to another workspace shortly after you `cd` into a different repo.
-- The plugin wraps your theme's `window-status-format` so windows from other workspaces render empty. The original format is kept in `@workspaces-orig-fmt`.
+- Each window is tagged (`@workspace`) with the git root of its active pane. A new window is tagged before its first redraw. Tags refresh on window and focus hooks on status redraws, with a full git recheck about every 30 seconds, so a window moves to another workspace shortly after you `cd` into a different repo.
+- The plugin wraps your theme's `window-status-format` so windows from other workspaces render empty. The current workspace comes directly from tmux during rendering, while layout cache updates run in the background after selection. The original format is kept in `@workspaces-orig-fmt`.
 
 ## Tips
 

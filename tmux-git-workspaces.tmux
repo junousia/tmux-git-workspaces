@@ -37,21 +37,24 @@ if [[ $fmt != *@workspaces-orig-fmt* ]]; then
   tmux set-option -g @workspaces-orig-current-fmt "$cur"
   tmux set-option -g window-status-separator ''
   tmux set-option -g window-status-format \
-    "#{?#{||:#{==:#{@workspaces-filter},off},#{==:#{@workspace},#{@workspace-active}}},#{E:@workspaces-orig-fmt}$sep,}"
+    "#{?#{||:#{==:#{@workspaces-filter},off},#{==:#{@workspace},#{W:,#{@workspace}}}},#{E:@workspaces-orig-fmt}$sep,}"
   # The empty #() also re-syncs workspaces every status-interval (catches cd).
   tmux set-option -g window-status-current-format \
     "#('$dir/scripts/sync.sh' '#{session_name}')#{E:@workspaces-orig-current-fmt}$sep"
 fi
 
+# Keep hook indexes stable across plugin reloads, and remove the old selection
+# sync hooks so upgrading an existing server actually takes the fast path.
 sync="run-shell -b '$dir/scripts/sync.sh'"
-i=0
-for h in after-new-window after-split-window window-linked pane-focus-in session-window-changed client-session-changed; do
-  tmux set-hook -g "$h[4$i]" "$sync"
-  i=$((i + 1))
-done
-# Layout (current workspace, tab positions) runs synchronously on window changes
-# so the status bar updates in the same frame; it needs no git.
-layout="run-shell '$dir/scripts/layout.sh'"
+tmux set-hook -g 'after-new-window[40]' "run-shell '$dir/scripts/sync.sh'"
+tmux set-hook -g 'after-split-window[41]' "$sync"
+tmux set-hook -g 'window-linked[42]' "$sync"
+tmux set-hook -g 'pane-focus-in[43]' "$sync"
+tmux set-hook -gu 'session-window-changed[44]'
+tmux set-hook -gu 'client-session-changed[45]'
+# Selection is rendered from tmux's live active window. Refresh cached layout
+# asynchronously for subsequent navigation and workspace picker state.
+layout="run-shell -b '$dir/scripts/layout.sh'"
 i=0
 for h in session-window-changed client-session-changed window-linked window-unlinked; do
   tmux set-hook -g "$h[5$i]" "$layout"

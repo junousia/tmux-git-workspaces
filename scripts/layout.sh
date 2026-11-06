@@ -5,7 +5,7 @@
 # that run (@workspace-slot: 0, 1, 2, ... static, independent of the selection)
 # and whether its right neighbour is the active window (@workspace-nextact: 1/0),
 # so themes can draw end caps, shade tabs and round the joins between them.
-# Hooks run it synchronously on window changes so the bar never lags a frame.
+# Hooks run it asynchronously; the bar reads the active window directly.
 # Optional $1: session whose windows to scan.
 
 sess=(); [[ -n $1 ]] && sess=(-t "$1")

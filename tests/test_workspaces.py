@@ -93,6 +93,27 @@ class WorkspaceScriptsTest(unittest.TestCase):
         self.script("toggle.sh")
         self.assertEqual(self.window_option(self.a2, "@workspace-slot"), "1")
 
+    def test_new_window_has_rounded_layout_before_first_redraw(self):
+        self.script("../tmux-git-workspaces.tmux")
+        hooks = self.tmux("show-hooks", "-g", "session-window-changed")
+        self.assertNotIn("scripts/sync.sh", hooks)
+        self.assertIn("run-shell -b", hooks)
+        created = self.new_window(self.repo_a)
+        self.assertEqual(self.window_option(created, "@workspace"), str(self.repo_a))
+        self.assertIn(self.window_option(created, "@workspace-pos"),
+                      ("first", "mid", "last", "only"))
+        self.assertNotEqual(self.window_option(created, "@workspace-slot"), "")
+
+    def test_periodic_refresh_detects_repo_at_same_path(self):
+        new_repo = self.root / "new repo"
+        new_repo.mkdir()
+        window = self.new_window(new_repo)
+        self.script("sync.sh")
+        self.assertEqual(self.window_option(window, "@workspace"), "(no repo)")
+        subprocess.run(["git", "init", "-q", str(new_repo)], check=True)
+        self.script("sync.sh", "test", "--refresh")
+        self.assertEqual(self.window_option(window, "@workspace"), str(new_repo))
+
     def test_picker_groups_windows_by_repo(self):
         rows = self.script("list.sh").splitlines()
         ids = [row.split("\t")[0] for row in rows]
