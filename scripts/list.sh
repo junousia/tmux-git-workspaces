@@ -6,16 +6,17 @@
 fmt=$'#{window_id}\t#{window_active}\t#{window_index}\t#{window_name}\t#{pane_current_path}'
 
 declare -A members first
+# Use compound updates: single-element assignments crash in Bash 5.3-2ubuntu1.
 workspaces=()
 
 while IFS=$'\t' read -r id active idx name path; do
   [[ -d $path ]] || path=$HOME
   root=$(git -C "$path" rev-parse --show-toplevel 2>/dev/null) || root="(no repo)"
   if [[ -z ${first[$root]} ]]; then
-    first[$root]=$id
+    first+=(["$root"]="$id")
     workspaces+=("$root")
   fi
-  members[$root]+="$id"$'\t'"$active"$'\t'"$idx"$'\t'"$name"$'\n'
+  members+=(["$root"]="${members[$root]}$id"$'\t'"$active"$'\t'"$idx"$'\t'"$name"$'\n')
 done < <(tmux list-windows -F "$fmt")
 
 dim=$'\e[2m'; bold=$'\e[1m'; reset=$'\e[0m'

@@ -78,6 +78,12 @@ bind % split-window -h -c "#{pane_current_path}"
 - Built for a single tmux session; the active workspace is stored globally.
 - The built-in `next-window` / `previous-window` still cycle through hidden windows; use the stepping keys above for tree order.
 
+## Development checks
+
+Run `python3 -m unittest discover -s tests -v` to check workspace tagging,
+layout/filter updates, picker grouping, and navigation. The checks require tmux,
+git, and Bash and use a temporary tmux server without touching existing sessions.
+
 ## License
 
 MIT

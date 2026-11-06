@@ -6,11 +6,12 @@ dir=${1:-next}
 
 fmt=$'#{window_id}\t#{window_active}\t#{@workspace}'
 declare -A members first
+# Use compound updates: single-element assignments crash in Bash 5.3-2ubuntu1.
 roots=(); current=
 
 while IFS=$'\t' read -r id active ws; do
-  if [[ -z ${first[$ws]+x} ]]; then first[$ws]=1; roots+=("$ws"); fi
-  members[$ws]+="$id "
+  if [[ -z ${first[$ws]+x} ]]; then first+=(["$ws"]=1); roots+=("$ws"); fi
+  members+=(["$ws"]="${members[$ws]}$id ")
   [[ $active == 1 ]] && { current=$id; current_root=$ws; }
 done < <(tmux list-windows -F "$fmt")
 

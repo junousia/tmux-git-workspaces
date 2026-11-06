@@ -38,10 +38,11 @@ for i in "${!ids[@]}"; do
 done
 [[ $(tmux show-option -gqv @workspace-active) == "$current" ]] || { cmd+=(set-option -gq @workspace-active "$current" \;); changed=1; }
 declare -A want
+# Compound updates avoid a SIGILL in Ubuntu's Bash 5.3-2ubuntu1 element assignment.
 for i in "${!vis[@]}"; do
   p=mid; (( i == 0 )) && p=first; (( i == n - 1 )) && p=last; (( n == 1 )) && p=only
   na=0; (( i + 1 == cur )) && na=1
-  want[${vis[$i]}]="$p/$i/$na"
+  want+=(["${vis[$i]}"]="$p/$i/$na")
 done
 for i in "${!ids[@]}"; do
   id=${ids[$i]}; w=${want[$id]-//}
