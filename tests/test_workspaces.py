@@ -87,7 +87,7 @@ class WorkspaceScriptsTest(unittest.TestCase):
             self.assertEqual(self.window_option(self.a1, "@workspace-pos"), "first")
             self.assertEqual(self.window_option(self.a2, "@workspace-pos"), "last")
             self.assertEqual(self.window_option(self.a2, "@workspace-slot"), "1")
-            self.assertEqual(self.window_option(self.a1, "@workspace-nextact"), "1")
+            self.assertEqual(self.window_option(self.a1, "@workspace-slot"), "0")
         self.script("toggle.sh")
         self.assertEqual(self.window_option(self.a2, "@workspace-slot"), "3")
         self.script("toggle.sh")
@@ -97,7 +97,7 @@ class WorkspaceScriptsTest(unittest.TestCase):
         self.script("../tmux-git-workspaces.tmux")
         hooks = self.tmux("show-hooks", "-g", "session-window-changed")
         self.assertNotIn("scripts/sync.sh", hooks)
-        self.assertIn("run-shell -b", hooks)
+        self.assertNotIn("scripts/layout.sh", hooks)
         created = self.new_window(self.repo_a)
         self.assertEqual(self.window_option(created, "@workspace"), str(self.repo_a))
         self.assertIn(self.window_option(created, "@workspace-pos"),

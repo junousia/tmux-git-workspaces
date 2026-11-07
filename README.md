@@ -61,7 +61,7 @@ The picker uses the terminal's own ANSI colours, so they follow your terminal th
 ## How it works
 
 - Each window is tagged (`@workspace`) with the git root of its active pane. A new window is tagged before its first redraw. Tags refresh on window and focus hooks on status redraws, with a full git recheck about every 30 seconds, so a window moves to another workspace shortly after you `cd` into a different repo.
-- The plugin wraps your theme's `window-status-format` so windows from other workspaces render empty. The current workspace comes directly from tmux during rendering, while layout cache updates run in the background after selection. The original format is kept in `@workspaces-orig-fmt`.
+- The plugin wraps your theme's `window-status-format` so windows from other workspaces render empty. The current workspace comes directly from tmux during rendering, while tab positions are cached for every workspace, so selection starts no layout job. The original format is kept in `@workspaces-orig-fmt`.
 
 ## Tips
 
@@ -83,6 +83,11 @@ bind % split-window -h -c "#{pane_current_path}"
 Run `python3 -m unittest discover -s tests -v` to check workspace tagging,
 layout/filter updates, picker grouping, and navigation. The checks require tmux,
 git, and Bash and use a temporary tmux server without touching existing sessions.
+
+For a local switch benchmark, run `python3 -B tests/bench_switch.py` with a
+sibling `tmux-axolotl` checkout. It compares v0.7.2 with the working tree on
+private tmux servers pinned to one CPU core. Results depend on the host; run it
+on the target machine to measure its actual latency.
 
 ## License
 

@@ -52,12 +52,10 @@ tmux set-hook -g 'window-linked[42]' "$sync"
 tmux set-hook -g 'pane-focus-in[43]' "$sync"
 tmux set-hook -gu 'session-window-changed[44]'
 tmux set-hook -gu 'client-session-changed[45]'
-# Selection is rendered from tmux's live active window. Refresh cached layout
-# asynchronously for subsequent navigation and workspace picker state.
+# Tab positions are cached for every workspace. Selection needs no layout hook.
+tmux set-hook -gu 'session-window-changed[50]'
+tmux set-hook -gu 'client-session-changed[51]'
 layout="run-shell -b '$dir/scripts/layout.sh'"
-i=0
-for h in session-window-changed client-session-changed window-linked window-unlinked; do
-  tmux set-hook -g "$h[5$i]" "$layout"
-  i=$((i + 1))
-done
+tmux set-hook -g 'window-linked[52]' "$layout"
+tmux set-hook -g 'window-unlinked[53]' "$layout"
 tmux run-shell -b "$dir/scripts/sync.sh"

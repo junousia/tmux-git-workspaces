@@ -14,7 +14,7 @@ if [[ $2 == --refresh || -z $last_refresh || $(( EPOCHSECONDS - last_refresh )) 
 fi
 # @workspace goes last: read collapses empty tab-separated fields.
 fmt=$'#{window_id}\t#{window_active}\t#{pane_current_path}\t#{@workspace}\t#{@workspace-path}'
-current=
+current=; active_id=; tag_changed=0
 
 while IFS=$'\t' read -r id active path ws cached_path; do
   [[ -d $path ]] || path=$HOME
@@ -22,12 +22,20 @@ while IFS=$'\t' read -r id active path ws cached_path; do
     root=$ws
   else
     root=$(git -C "$path" rev-parse --show-toplevel 2>/dev/null) || root="(no repo)"
+    tag_changed=1
     tmux set-option -wq -t "$id" @workspace "$root" ';' \
       set-option -wq -t "$id" @workspace-path "$path"
   fi
-  [[ $active == 1 ]] && current=$root
+  [[ $active == 1 ]] && { current=$root; active_id=$id; }
 done < <(tmux list-windows "${sess[@]}" -F "$fmt")
 
 [[ -n $current && $(tmux show-option -gqv @workspace-active) != "$current" ]] && tmux set-option -gq @workspace-active "$current"
 
-exec "$(dirname "${BASH_SOURCE[0]}")/layout.sh" "$@"
+# Last-used window is navigation state, independent of tab geometry.
+if [[ -n $active_id && $(tmux show-option -gqv @workspaces-last-seen) != "$active_id" ]]; then
+  key=@wslast-$(cksum <<<"$current" | cut -d' ' -f1)
+  tmux set-option -gq @workspaces-last-seen "$active_id" ';' \
+    set-option -gq "$key" "$active_id"
+fi
+[[ $tag_changed == 1 || $2 == --layout ]] && exec "$(dirname "${BASH_SOURCE[0]}")/layout.sh" "$1"
+exit 0
