@@ -5,10 +5,21 @@ dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 source "$dir/palette.sh"
 
 # Ignore the user's global fzf options (height, margin, border...): they break the popup layout.
-choice=$("$dir/list.sh" | FZF_DEFAULT_OPTS= fzf --ansi --no-sort --layout=reverse --no-border --info=inline-right \
+view=$(tmux show-option -gqv @workspaces-view); view=${view:-collapsed}
+if [[ $view == tree ]]; then
+  list=("$dir/list.sh" --tree)
+  header=$'enter jump · esc cancel · type to filter windows or repos\n'
+  binds=()
+else
+  list=("$dir/list.sh")
+  header=$'enter jump · tab windows · S-tab back · esc\n● here · next row: where you were\n'
+  binds=(--bind "tab:reload('$dir/list.sh' --windows {3})+first" --bind "btab:reload('$dir/list.sh')+first")
+fi
+
+choice=$("${list[@]}" | FZF_DEFAULT_OPTS= fzf --ansi --no-sort --layout=reverse --no-border --info=inline-right \
   --delimiter=$'\t' --with-nth=2,4 \
   --prompt='  ' --pointer='▌' --marker='▌' \
-  --header=$'enter jump · esc cancel · type to filter windows or repos\n' \
+  --header="$header" "${binds[@]}" \
   --preview="'$dir/preview.sh' {1} {3}" --preview-window='right,45%,border-left,wrap' \
   --color="bg+:$(fzf_color "$P_SURFACE"),fg+:$(fzf_color "$P_TEXT"),hl:$(fzf_color "$P_ACCENT"),hl+:$(fzf_color "$P_ACCENT"),pointer:$(fzf_color "$P_ACCENT"),prompt:$(fzf_color "$P_ACCENT"),header:$(fzf_color "$P_MUTED"),info:$(fzf_color "$P_MUTED"),border:$(fzf_color "$P_MUTED"),gutter:-1") || exit 0
 

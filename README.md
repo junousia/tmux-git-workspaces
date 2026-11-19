@@ -2,7 +2,7 @@
 
 Group your tmux windows by git repository.
 
-- A keyboard-driven **workspace tree** (`prefix + W`): git repos with their windows nested underneath, filterable, with a preview of the repo (branch, changes, recent commits, what each window is running).
+- A keyboard-driven **workspace picker** (`prefix + w`): one row per git repo, most recently used first, filterable (window names match too), with a preview of the repo (branch, changes, recent commits, what each window is running).
 - The **status bar window list is filtered** to the current workspace, so you only see the windows of the repo you're working in.
 
 Windows outside any git repo are grouped together under a single `(no repo)` workspace.
@@ -29,11 +29,14 @@ Then press `prefix + I` to install.
 
 | Key | Action |
 | --- | --- |
-| `prefix + W` | Open the workspace tree. Type to filter by window or repo name, `enter` to jump. |
+| `prefix + w` | Open the workspace picker. Type to filter by repo or window name, `enter` to jump to the window you last used there, `tab` to list that workspace's windows, `shift-tab` to go back. |
+| `prefix + Tab` | Jump back to the previous workspace (landing on its last window). Press again to return, like alt-tab. |
 | `prefix + F` | Toggle the status bar filter (show all windows / only the current workspace). |
 
 
-Selecting a repo header jumps to that repo's first window. Switching windows any other way also switches the status bar to the workspace you land in.
+The first row of the picker is where you are and the second is where you were, so `prefix + w`, `down`, `enter` also goes back. Switching windows any other way also switches the status bar to the workspace you land in.
+
+Recency comes from a counter that ticks on every window change (`session-window-changed`, plain tmux commands, no process started). `@workspaces-order 'created'` orders the picker by when each repo's first window was opened instead, and `@workspaces-view 'tree'` brings back the old view with every window listed.
 
 ## Stepping through windows
 
@@ -49,7 +52,10 @@ set -g @workspaces-prev-ws-key 'S-Up'     # ... and the previous one
 ## Options
 
 ```tmux
-set -g @workspaces-key 'W'          # key for the workspace tree
+set -g @workspaces-key 'w'          # key for the workspace picker (default w; 'root:M-w' binds without the prefix; 'off' disables)
+set -g @workspaces-last-key 'Tab'   # key for the previous workspace (same rules; default Tab)
+set -g @workspaces-order 'mru'      # picker order: mru (default) | created
+set -g @workspaces-view 'collapsed' # picker view: collapsed (default) | tree
 set -g @workspaces-toggle-key 'F'   # key to toggle the status bar filter
 set -g @workspaces-filter 'off'     # start with the filter disabled
 ```

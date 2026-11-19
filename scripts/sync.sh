@@ -31,11 +31,5 @@ done < <(tmux list-windows "${sess[@]}" -F "$fmt")
 
 [[ -n $current && $(tmux show-option -gqv @workspace-active) != "$current" ]] && tmux set-option -gq @workspace-active "$current"
 
-# Last-used window is navigation state, independent of tab geometry.
-if [[ -n $active_id && $(tmux show-option -gqv @workspaces-last-seen) != "$active_id" ]]; then
-  key=@wslast-$(cksum <<<"$current" | cut -d' ' -f1)
-  tmux set-option -gq @workspaces-last-seen "$active_id" ';' \
-    set-option -gq "$key" "$active_id"
-fi
 [[ $tag_changed == 1 || $2 == --layout ]] && exec "$(dirname "${BASH_SOURCE[0]}")/layout.sh" "$1"
 exit 0
