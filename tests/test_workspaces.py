@@ -114,13 +114,37 @@ class WorkspaceScriptsTest(unittest.TestCase):
         self.script("sync.sh", "test", "--refresh")
         self.assertEqual(self.window_option(window, "@workspace"), str(new_repo))
 
-    def test_picker_groups_windows_by_repo(self):
-        rows = self.script("list.sh").splitlines()
+    def test_tree_view_groups_windows_by_repo(self):
+        rows = self.script("list.sh", "--tree").splitlines()
         ids = [row.split("\t")[0] for row in rows]
         self.assertEqual(ids, [self.a1, self.a1, self.a2, self.b, self.b,
                                self.no_repo, self.no_repo])
 
+    def test_picker_has_one_row_per_workspace_most_recent_first(self):
+        self.script("../tmux-git-workspaces.tmux")
+        for window in (self.b, self.no_repo, self.a2):
+            self.tmux("select-window", "-t", window)
+        rows = [r.split("\t") for r in self.script("list.sh").splitlines()]
+        # where you are, then where you were (the no-repo window), then repo two
+        self.assertEqual([r[2] for r in rows],
+                         [str(self.repo_a), "(no repo)", str(self.repo_b)])
+        # each row jumps to the window last used in that workspace
+        self.assertEqual([r[0] for r in rows], [self.a2, self.no_repo, self.b])
+        self.tmux("set-option", "-g", "@workspaces-order", "created")
+        rows = [r.split("\t")[2] for r in self.script("list.sh").splitlines()]
+        self.assertEqual(rows, [str(self.repo_a), str(self.repo_b), "(no repo)"])
+
+    def test_previous_workspace_key_toggles_between_two_workspaces(self):
+        self.script("../tmux-git-workspaces.tmux")
+        for window in (self.a1, self.b, self.a2):
+            self.tmux("select-window", "-t", window)
+        self.script("last.sh")
+        self.assertEqual(self.active_window(), self.b)
+        self.script("last.sh")
+        self.assertEqual(self.active_window(), self.a2)
+
     def test_navigation_and_workspace_memory(self):
+        self.script("../tmux-git-workspaces.tmux")  # installs the recent-use hook
         self.tmux("select-window", "-t", self.a1)
         for target in (self.a2, self.b, self.no_repo, self.a1):
             self.script("step.sh", "next")
