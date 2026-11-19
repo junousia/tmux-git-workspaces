@@ -3,10 +3,12 @@
 # tmux reads the active window directly while drawing the bar.
 sess=(); [[ -n $1 ]] && sess=(-t "$1")
 filter=$(tmux show-option -gqv @workspaces-filter)
+# @workspaces-scope: repo (default; a repo's worktrees share a run of tabs) or worktree
+scope=@workspace; [[ $(tmux show-option -gqv @workspaces-scope) == worktree ]] && scope=@worktree
 ids=(); old=(); wss=()
 while IFS=$'\t' read -r id state ws; do
   ids+=("$id"); old+=("$state"); wss+=("$ws")
-done < <(tmux list-windows "${sess[@]}" -F $'#{window_id}\t#{@workspace-pos}/#{@workspace-slot}\t#{@workspace}')
+done < <(tmux list-windows "${sess[@]}" -F "#{window_id}"$'\t'"#{@workspace-pos}/#{@workspace-slot}"$'\t'"#{$scope}")
 
 # An unfiltered bar is one run. Otherwise each workspace is its own run, even
 # when it is not selected, so switching workspaces needs no shell work.

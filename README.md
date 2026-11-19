@@ -7,6 +7,16 @@ Group your tmux windows by git repository.
 
 Windows outside any git repo are grouped together under a single `(no repo)` workspace.
 
+## Worktrees
+
+A workspace is a git **repository**, not a checkout: the main checkout and all of its `git worktree`s share one workspace, identified by the repository's common git directory. Bare-repository layouts (`repo.git` plus sibling worktree folders) work too.
+
+- The workspace is named after the repo folder (`api`); when two repos would look the same, the parent folder is added (`acme/api`, `other/api`).
+- The status bar shows the windows of the whole repo, all worktrees together. `set -g @workspaces-scope 'worktree'` filters per worktree instead.
+- The picker shows one row per repo (`⌥ 3` marks that it has 3 worktrees with windows). `tab` lists the windows grouped by worktree, each with its branch.
+- Each window is tagged with `@workspace` (repo root), `@worktree` (its checkout) and `@workspace-label` (display name). Themes can use them; with tmux-axolotl 0.9.0+ the workspace pill shows the repo and the branch pill the branch of the checkout you are in.
+- Submodules have their own git directory and stay separate workspaces.
+
 ## Requirements
 
 - tmux 3.3+ (popup borders)
@@ -56,6 +66,7 @@ set -g @workspaces-key 'w'          # key for the workspace picker (default w; '
 set -g @workspaces-last-key 'Tab'   # key for the previous workspace (same rules; default Tab)
 set -g @workspaces-order 'mru'      # picker order: mru (default) | created
 set -g @workspaces-view 'collapsed' # picker view: collapsed (default) | tree
+set -g @workspaces-scope 'repo'     # status bar filter: repo (default; worktrees together) | worktree
 set -g @workspaces-toggle-key 'F'   # key to toggle the status bar filter
 set -g @workspaces-filter 'off'     # start with the filter disabled
 ```

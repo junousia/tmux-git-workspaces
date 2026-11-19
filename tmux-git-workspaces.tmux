@@ -42,18 +42,22 @@ if [[ -z $sep && -z $(tmux show-option -gqv @workspaces-orig-fmt) ]]; then
   sep=$(tmux show-option -gv window-status-separator)
   tmux set-option -g @workspaces-orig-sep "$sep"
 fi
+# Filter scope: a repo's worktrees share one workspace (default), or each worktree
+# filters on its own (@workspaces-scope worktree).
+scope=@workspace; [[ $(opt @workspaces-scope repo) == worktree ]] && scope=@worktree
 fmt=$(tmux show-option -gv window-status-format)
 if [[ $fmt != *@workspaces-orig-fmt* ]]; then
   cur=$(tmux show-option -gv window-status-current-format)
   tmux set-option -g @workspaces-orig-fmt "$fmt"
   tmux set-option -g @workspaces-orig-current-fmt "$cur"
   tmux set-option -g window-status-separator ''
-  tmux set-option -g window-status-format \
-    "#{?#{||:#{==:#{@workspaces-filter},off},#{==:#{@workspace},#{W:,#{@workspace}}}},#{E:@workspaces-orig-fmt}$sep,}"
   # The empty #() also re-syncs workspaces every status-interval (catches cd).
   tmux set-option -g window-status-current-format \
     "#('$dir/scripts/sync.sh' '#{session_name}')#{E:@workspaces-orig-current-fmt}$sep"
 fi
+# (Re)write the filter wrapper on every load so a changed @workspaces-scope applies.
+tmux set-option -g window-status-format \
+  "#{?#{||:#{==:#{@workspaces-filter},off},#{==:#{$scope},#{W:,#{$scope}}}},#{E:@workspaces-orig-fmt}$sep,}"
 
 # Keep hook indexes stable across plugin reloads, and remove the old selection
 # sync hooks so upgrading an existing server actually takes the fast path.
@@ -79,4 +83,4 @@ tmux set-hook -g 'session-window-changed[60]' \
 if [[ -z $(tmux display-message -p '#{@workspaces-seen}') ]]; then
   tmux set-option -gF @workspaces-clock '#{e|+:#{@workspaces-clock},1}' \; set-option -wF @workspaces-seen '#{@workspaces-clock}'
 fi
-tmux run-shell -b "$dir/scripts/sync.sh"
+tmux run-shell -b "$dir/scripts/sync.sh '' --refresh"
